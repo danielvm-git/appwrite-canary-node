@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- big-release managed -->
 
+## [1.2.0] - 2026-11-24
+
+### Added
+
+- **feat:** real landing login, session guard and profile menu with sign out ([#9](https://github.com/danielvm-git/appwrite-canary-node/issues/9)) ([d7787e5](https://github.com/danielvm-git/appwrite-canary-node/commit/d7787e52470f55bb57930a354dc0e4517410182d))
+
 ## [1.1.4] - 2026-11-24
 
 ### Fixed
