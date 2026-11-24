@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- big-release managed -->
 
+## [1.3.0] - 2026-11-24
+
+### Added
+
+- **feat:** todo app with auth tablesdb routes and attachments ([#11](https://github.com/danielvm-git/appwrite-canary-node/issues/11)) ([6ba4b95](https://github.com/danielvm-git/appwrite-canary-node/commit/6ba4b95d01585b2e2f1cd7ed2782dba9b78a0323))
+
 ## [1.2.0] - 2026-11-24
 
 ### Added
