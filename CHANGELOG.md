@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- big-release managed -->
 
+## [1.3.1] - 2026-11-24
+
+### Fixed
+
+- **fix:** shared session provider prevents blank tasks page ([#13](https://github.com/danielvm-git/appwrite-canary-node/issues/13)) ([afdeb48](https://github.com/danielvm-git/appwrite-canary-node/commit/afdeb48fafec2d075ea2361c484b2cddaa38e5c5))
+
 ## [1.3.0] - 2026-11-24
 
 ### Added
