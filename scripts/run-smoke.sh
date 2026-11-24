@@ -13,6 +13,6 @@ html="$(curl -skS "$BASE/")"
 asset="$(echo "$html" | grep -oE '/assets/index-[^"]+\.js' | head -1)"
 [ -n "$asset" ] || { echo "no bundle" >&2; exit 1; }
 js="$(curl -skS "$BASE$asset")"
-echo "$js" | grep -q 'Hello World'
-echo "$js" | grep -q "$LIVE_VER"
+grep -q 'Shared with me' <<<"$js"
+grep -q "$LIVE_VER" <<<"$js"
 echo "smoke OK v$LIVE_VER @ $BASE"
