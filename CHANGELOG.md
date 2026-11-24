@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- big-release managed -->
 
+## [1.1.2] - 2026-11-24
+
+### Fixed
+
+- **fix:** smoke uses live health version ([#6](https://github.com/danielvm-git/appwrite-canary-node/issues/6)) ([11aa570](https://github.com/danielvm-git/appwrite-canary-node/commit/11aa570cc24a2a367b0d950a3fa91246c90b840a))
+
 ## [1.1.1] - 2026-11-24
 
 ### Fixed
