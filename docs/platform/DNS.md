@@ -2,14 +2,21 @@
 
 | Host | Type | Target |
 |------|------|--------|
-| node.danielvm.net | A | 138.2.246.52 |
-| python.danielvm.net | A | 138.2.246.52 |
-| php.danielvm.net | A | 138.2.246.52 |
-| go.danielvm.net | A | 138.2.246.52 |
+| sites.danielvm.net | A | 138.2.246.52 |
+| node.danielvm.net | CNAME | `sites.danielvm.net` |
+| python.danielvm.net | CNAME | `sites.danielvm.net` |
+| php.danielvm.net | CNAME | `sites.danielvm.net` |
+| go.danielvm.net | CNAME | `sites.danielvm.net` |
 
-Cloudflare: DNS only (no proxy) if Let's Encrypt HTTP-01 on origin.
+Cloudflare: **DNS only** (grey cloud). Custom site hostnames must **CNAME** to `sites.danielvm.net` so Appwrite proxy rules verify (A-only fails verification).
 
-Appwrite instance `.env`: `_APP_DOMAIN_SITES` must include `sites.danielvm.net` when using custom site domains.
+Appwrite instance `.env`:
+
+- `_APP_DOMAIN_SITES=sites.danielvm.net`
+- `_APP_DOMAIN_TARGET_CNAME=sites.danielvm.net`
+- `_APP_DOMAIN_TARGET_A=138.2.246.52` (origin IP for validation)
+
+Then `docker compose up -d --force-recreate appwrite appwrite-worker` on the host.
 
 ## GitHub repository secrets (appwrite-canary-node)
 
