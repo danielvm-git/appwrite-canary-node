@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- big-release managed -->
 
+## [1.1.4] - 2026-11-24
+
+### Fixed
+
+- **fix:** console layout matches shell prototype ([#8](https://github.com/danielvm-git/appwrite-canary-node/issues/8)) ([fc11897](https://github.com/danielvm-git/appwrite-canary-node/commit/fc118971d7c0c8260998ff90d2bb0fb3426dc209))
+
 ## [1.1.3] - 2026-11-24
 
 ### Fixed
