@@ -1,0 +1,15 @@
+story_id: e09s01
+title: "e09s01 pilot shipped"
+status: done
+bcps: 8
+tasks:
+  - id: 1
+    description: "live todo verify"
+    verify: "bash scripts/verify-todo-live.sh"
+    risk: P0
+    status: done
+  - id: 2
+    description: "production smoke"
+    verify: "bash scripts/run-smoke.sh"
+    risk: P0
+    status: done

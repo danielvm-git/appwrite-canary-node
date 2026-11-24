@@ -1,0 +1,15 @@
+story_id: e09s02
+title: "e09s02 shell consumer"
+status: todo
+bcps: 4
+tasks:
+  - id: 1
+    description: "sync from shell and preflight"
+    verify: "bash scripts/verify-story-e09s02.sh"
+    risk: P0
+    status: todo
+  - id: 2
+    description: "smoke production"
+    verify: "bash scripts/run-smoke.sh"
+    risk: P0
+    status: todo
