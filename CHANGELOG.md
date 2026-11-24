@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- big-release managed -->
 
+## [0.1.1] - 2026-11-24
+
+### Fixed
+
+- **fix:** add health.json and prove release smoke on production ([#1](https://github.com/danielvm-git/appwrite-canary-node/issues/1)) ([b4ec2eb](https://github.com/danielvm-git/appwrite-canary-node/commit/b4ec2eb943172a31469465d420ba8eca3be59d30))
+
 ## [0.1.0] - 2026-11-24
 
 ### Added
