@@ -31,7 +31,7 @@ export function createFunctions(): Functions {
 }
 
 export const TODO_DATABASE_ID = "todo";
-export const SHARE_FUNCTION_ID = "share-task";
+export const SHARE_FUNCTION_ID = import.meta.env.VITE_SHARE_FUNCTION_ID || "share-task";
 export const LISTS_TABLE_ID = "lists";
 export const TASKS_TABLE_ID = "tasks";
 export const ATTACHMENTS_BUCKET_ID = "task-attachments";

@@ -1,27 +1,21 @@
 {
-  "name": "appwrite-canary-node",
+  "name": "@appwrite-canaries/todo-app",
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Appwrite Sites canary — Node pilot",
+  "description": "Shared Todo SPA for Appwrite language canaries",
   "scripts": {
     "dev": "vite",
     "build": "vite build && node scripts/write-dist-health.mjs",
     "preview": "vite preview",
-    "start": "node server.js",
     "test": "vitest run",
     "lint": "eslint src",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "preflight": "npm run typecheck && npm run lint && npm test",
-    "observability-check": "bash scripts/observability-check.sh",
-    "test:data": "vitest run src/lib/tasks.test.ts src/lib/lists.test.ts src/lib/taskPayload.test.ts src/lib/attachments.test.ts src/lib/taskView.test.ts src/lib/share.test.ts functions/share-task"
+    "preflight": "npm run typecheck && npm run lint && npm test"
   },
   "dependencies": {
     "@phosphor-icons/web": "^2.1.2",
     "appwrite": "^21.0.0",
-    "express": "^5.1.0",
-    "pino": "^9.9.0",
-    "pino-http": "^10.5.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.8.2"
