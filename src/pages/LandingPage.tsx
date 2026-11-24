@@ -8,10 +8,11 @@ export function LandingPage() {
       <div className="landing-pane landing-pane--marketing">
         <main className="landing-hero">
           <h1>Hello World</h1>
-          <p className="lead">Appwrite Canaries — Node pilot on Appwrite Sites (release loop proven).</p>
+          <p className="lead">Appwrite Canaries — Node pilot (staging at node-staging.danielvm.net).</p>
           <ul>
-            <li>Deploy at node.danielvm.net</li>
-            <li>Shared shell from appwrite-canary-shell</li>
+            <li>Production: node.danielvm.net</li>
+            <li>Staging: node-staging.danielvm.net</li>
+            <li>Console: Auth, Database, Storage slices</li>
           </ul>
         </main>
         <footer className="site-footer" aria-label="Marketing links">
