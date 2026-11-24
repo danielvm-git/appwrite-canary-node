@@ -18,7 +18,8 @@ export function AuthPage() {
       await account.createEmailPasswordSession(email, password);
       setMessage("Session created");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Auth failed");
+      const msg = error instanceof Error ? error.message : "Auth failed";
+      setMessage(msg.includes("Invalid credentials") ? "Invalid email or password" : msg);
     }
   }
 
