@@ -5,7 +5,9 @@ import {
   createTablesDB,
   newId,
 } from "./appwrite";
+import { clientLog } from "./log";
 import { buildTaskPatch, buildTaskRowData } from "./taskPayload";
+import { rowDocumentId } from "./rowId";
 
 export type TaskStatus = "open" | "done";
 
@@ -87,13 +89,20 @@ export async function getTask(taskId: string): Promise<Task> {
 export async function createTask(userId: string, input: TaskInput): Promise<Task> {
   const rowId = newId();
   const db = createTablesDB();
-  const row = await db.createRow({
-    databaseId: TODO_DATABASE_ID,
-    tableId: TASKS_TABLE_ID,
-    rowId,
-    data: buildTaskRowData(userId, input),
-  });
-  return row as unknown as Task;
+  try {
+    const row = await db.createRow({
+      databaseId: TODO_DATABASE_ID,
+      tableId: TASKS_TABLE_ID,
+      rowId,
+      data: buildTaskRowData(userId, input),
+    });
+    const task = row as unknown as Task;
+    rowDocumentId(task);
+    return task;
+  } catch (err) {
+    clientLog.error("tasks.createRow failed", err, { tableId: TASKS_TABLE_ID, operation: "createTask" });
+    throw err;
+  }
 }
 
 export async function updateTask(
@@ -105,13 +114,22 @@ export async function updateTask(
   const existing = await getTask(id);
   if (existing.userId !== userId) throw new Error("Not allowed");
   const db = createTablesDB();
-  const row = await db.updateRow({
-    databaseId: TODO_DATABASE_ID,
-    tableId: TASKS_TABLE_ID,
-    rowId: id,
-    data: buildTaskPatch(patch),
-  });
-  return row as unknown as Task;
+  try {
+    const row = await db.updateRow({
+      databaseId: TODO_DATABASE_ID,
+      tableId: TASKS_TABLE_ID,
+      rowId: id,
+      data: buildTaskPatch(patch),
+    });
+    return row as unknown as Task;
+  } catch (err) {
+    clientLog.error("tasks.updateRow failed", err, {
+      tableId: TASKS_TABLE_ID,
+      operation: "updateTask",
+      rowId: id,
+    });
+    throw err;
+  }
 }
 
 export async function toggleTaskStatus(userId: string, task: Task): Promise<Task> {
