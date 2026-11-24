@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- big-release managed -->
 
+## [1.4.1] - 2026-11-24
+
+### Fixed
+
+- **fix:** smoke script checks the tasks bundle without sigpipe failures ([#19](https://github.com/danielvm-git/appwrite-canary-node/issues/19)) ([b1c8695](https://github.com/danielvm-git/appwrite-canary-node/commit/b1c8695cd232e9cb202378c6e498e019aac160ac))
+
 ## [1.4.0] - 2026-11-24
 
 ### Added
