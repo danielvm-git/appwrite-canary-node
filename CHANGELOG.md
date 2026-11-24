@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- big-release managed -->
 
+## [0.1.0] - 2026-11-24
+
+### Added
+
+- **feat:** hello world walking skeleton prep ([abf486a](https://github.com/danielvm-git/appwrite-canary-node/commit/abf486a899d2d18060678705b4f52ae0b3ccf723))
+
 ## [0.2.0] - 2026-11-23
 
 ### Added
