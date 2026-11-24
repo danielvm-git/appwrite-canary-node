@@ -4,8 +4,8 @@ import { useSession } from "../hooks/useSession";
 import { createList, deleteList, listListsForUser, type TodoList } from "../lib/lists";
 
 export function ListsPage() {
-  const { user } = useSession();
-  const userId = user!.$id;
+  const { user, loading } = useSession();
+  const userId = user?.$id ?? "";
   const [lists, setLists] = useState<TodoList[]>([]);
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -20,6 +20,7 @@ export function ListsPage() {
   }
 
   useEffect(() => {
+    if (!userId) return;
     void reload();
   }, [userId]);
 
@@ -37,6 +38,8 @@ export function ListsPage() {
     await deleteList(userId, list.$id);
     await reload();
   }
+
+  if (loading || !user) return null;
 
   return (
     <section>
