@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- big-release managed -->
 
+## [1.3.3] - 2026-11-24
+
+### Fixed
+
+- **fix:** task row id routing client logs and observability checks ([#16](https://github.com/danielvm-git/appwrite-canary-node/issues/16)) ([5be161a](https://github.com/danielvm-git/appwrite-canary-node/commit/5be161a0b546b27f2105661d8dfeb665cea896c7))
+
 ## [1.3.2] - 2026-11-24
 
 ### Fixed
