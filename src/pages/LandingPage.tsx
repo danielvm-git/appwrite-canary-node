@@ -54,15 +54,15 @@ export function LandingPage() {
 
 function LoginCard() {
   const navigate = useNavigate();
-  const { user, loading } = useSession();
+  const { user, loading, refresh } = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [register, setRegister] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user) navigate("/tasks", { replace: true });
-  }, [user, navigate]);
+    if (!loading && user) navigate("/tasks", { replace: true });
+  }, [loading, user, navigate]);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
@@ -74,6 +74,7 @@ function LoginCard() {
     try {
       if (register) await account.create(newId(), email, password);
       await account.createEmailPasswordSession(email, password);
+      await refresh();
       navigate("/tasks");
     } catch (error) {
       const msg = error instanceof Error ? error.message : "Sign in failed";
