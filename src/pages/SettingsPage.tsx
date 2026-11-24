@@ -19,14 +19,22 @@ export function SettingsPage() {
 
   return (
     <section>
-      <h1>Settings</h1>
-      <label>
-        Theme
-        <select value={theme} onChange={(e) => onChange(e.target.value)}>
+      <h1 className="page-title ds-h1">Settings</h1>
+      <p className="page-desc">Shell accent (BigBase canary pink).</p>
+      <div className="input-group form-stack">
+        <label className="input-label" htmlFor="theme-accent">
+          Theme
+        </label>
+        <select
+          className="input"
+          id="theme-accent"
+          value={theme}
+          onChange={(e) => onChange(e.target.value)}
+        >
           <option value="canary">canary</option>
           <option value="default">default (indigo)</option>
         </select>
-      </label>
+      </div>
     </section>
   );
 }

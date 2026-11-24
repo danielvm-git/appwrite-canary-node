@@ -32,27 +32,45 @@ export function AuthPage() {
 
   return (
     <section>
-      <h1>Auth</h1>
-      <form onSubmit={onSubmit} className="stack">
-        <label>
-          Email
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        </label>
-        <label>
-          Password
+      <h1 className="page-title ds-h1">Auth</h1>
+      <p className="page-desc">Email/password session against project Scaffold.</p>
+      <form onSubmit={onSubmit} className="form-stack">
+        <div className="input-group">
+          <label className="input-label" htmlFor="auth-email">
+            Email
+          </label>
           <input
+            className="input"
+            id="auth-email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            autoComplete="email"
+          />
+        </div>
+        <div className="input-group">
+          <label className="input-label" htmlFor="auth-password">
+            Password
+          </label>
+          <input
+            className="input"
+            id="auth-password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            autoComplete="current-password"
           />
-        </label>
-        <button type="submit" className="btn btn-primary">
-          Sign in
-        </button>
-        <button type="button" className="btn btn-secondary" onClick={logout}>
-          Logout
-        </button>
+        </div>
+        <div className="row">
+          <button type="submit" className="btn btn-primary">
+            Sign in
+          </button>
+          <button type="button" className="btn btn-secondary" onClick={logout}>
+            Logout
+          </button>
+        </div>
       </form>
       {message && <p className="mono">{message}</p>}
     </section>

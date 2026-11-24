@@ -10,8 +10,9 @@ const hosts = [
 export function SitesPage() {
   return (
     <section>
-      <h1>Sites</h1>
-      <p className="text-muted">Deployable canaries on Appwrite Sites (CNAME → sites.danielvm.net).</p>
+      <h1 className="page-title ds-h1">Sites</h1>
+      <p className="page-desc">Deployable canaries on Appwrite Sites (CNAME → sites.danielvm.net).</p>
+      <div className="table-wrap">
       <table className="mono">
         <thead>
           <tr>
@@ -34,6 +35,7 @@ export function SitesPage() {
           ))}
         </tbody>
       </table>
+      </div>
     </section>
   );
 }

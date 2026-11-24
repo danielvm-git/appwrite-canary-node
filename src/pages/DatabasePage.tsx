@@ -44,14 +44,26 @@ export function DatabasePage() {
 
   return (
     <section>
-      <h1>Database</h1>
-      <form onSubmit={onCreate} className="stack">
-        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Item title" />
+      <h1 className="page-title ds-h1">Database</h1>
+      <p className="page-desc">Collection canary / items.</p>
+      <form onSubmit={onCreate} className="form-stack">
+        <div className="input-group">
+          <label className="input-label" htmlFor="db-title">
+            Title
+          </label>
+          <input
+            className="input"
+            id="db-title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Item title"
+          />
+        </div>
         <button type="submit" className="btn btn-primary">
           Create row
         </button>
       </form>
-      <ul>
+      <ul className="landing-bullets" style={{ marginTop: "var(--space-8)" }}>
         {rows.map((row) => (
           <li key={row.$id} className="mono">
             {row.title}
