@@ -1,9 +1,9 @@
 base_url: "https://node.danielvm.net"
 checks:
-  - name: Homepage Hello World
+  - name: Homepage Todo app
     path: "/"
     expected_status: 200
-    content_signal: "Hello World"
+    content_signal: "Todo app"
     max_response_time_ms: 8000
   - name: Health JSON
     path: "/health.json"
