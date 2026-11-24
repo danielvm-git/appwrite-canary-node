@@ -1,15 +1,17 @@
 // story: e01s02
+import { appwriteConfigured } from "../lib/appwrite";
+
 export function OverviewPage() {
-  const shellPin =
-    typeof fetch !== "undefined"
-      ? "public/shell/SHELL_PIN"
-      : "";
+  const configured = appwriteConfigured();
   return (
     <section>
       <h1>Overview</h1>
       <p className="mono">Site version: v{__APP_VERSION__}</p>
-      <p className="text-muted">Endpoint: {import.meta.env.VITE_APPWRITE_ENDPOINT || "not configured"}</p>
-      <p className="text-muted">Shell pin file: {shellPin}</p>
+      <p className="text-muted">Appwrite: {configured ? "configured" : "not configured"}</p>
+      {configured && (
+        <p className="text-muted">Slices: auth, database (canary/items), storage (canary-files)</p>
+      )}
+      <p className="text-muted">Shell pin: public/shell/SHELL_PIN</p>
     </section>
   );
 }
