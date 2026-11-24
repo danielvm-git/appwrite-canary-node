@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- big-release managed -->
 
+## [1.5.0] - 2026-11-24
+
+### Added
+
+- **feat:** settings gear in topbar replaces duplicate user avatar ([#20](https://github.com/danielvm-git/appwrite-canary-node/issues/20)) ([4ca9561](https://github.com/danielvm-git/appwrite-canary-node/commit/4ca956157ca230bd54412cc4f127ecdd4764fb6a))
+
 ## [1.4.1] - 2026-11-24
 
 ### Fixed
