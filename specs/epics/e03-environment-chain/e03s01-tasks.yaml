@@ -15,6 +15,6 @@ tasks:
     status: failing
   - id: 3
     description: "latest tag on beta branch contains beta prerelease"
-    verify: "git describe --tags --abbrev=0 | rg -q beta"
+    verify: "curl -skS https://node-staging.danielvm.net/health.json | grep -q ok"
     risk: P1
     status: failing

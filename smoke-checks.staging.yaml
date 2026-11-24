@@ -1,0 +1,12 @@
+base_url: "https://node-staging.danielvm.net"
+checks:
+  - name: Staging health
+    path: "/health.json"
+    expected_status: 200
+    content_signal: "ok"
+    max_response_time_ms: 8000
+  - name: Staging bundle version
+    path: "/"
+    expected_status: 200
+    content_signal: "Hello World"
+    max_response_time_ms: 8000
