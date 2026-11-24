@@ -1,30 +1,28 @@
 // story: e01s02
+const REPO = "https://github.com/danielvm-git/appwrite-canary-node";
+
 export function AppFooter({ testId }: { testId: string }) {
   const version = __APP_VERSION__;
   return (
     <footer className="app-footer" data-testid={testId}>
-      <div className="app-footer-brand">
-        <span className="app-footer-logo" aria-hidden="true">
-          B
-        </span>
-        <span>© 2026 Appwrite Canaries · MIT</span>
-      </div>
+      <span>© 2026 Tasks · Todo API</span>
       <div className="app-footer-meta">
-        <span className="mono version-tag">v{version}</span>
-        <span className="app-footer-sep" aria-hidden="true" />
+        <span>v{version}</span>
         <span>
           Built with{" "}
-          <a href="https://github.com/danielvm-git/bigpowers" target="_blank" rel="noreferrer">
+          <a className="strong" href="https://github.com/danielvm-git/BigPowers" target="_blank" rel="noreferrer">
             BigPowers
           </a>{" "}
           by{" "}
-          <a href="https://github.com/danielvm-git" target="_blank" rel="noreferrer">
+          <a className="strong" href="https://github.com/danielvm-git" target="_blank" rel="noreferrer">
             danielvm-git
           </a>
         </span>
-        <span className="app-footer-sep" aria-hidden="true" />
-        <a href="https://github.com/danielvm-git/appwrite-canary-node" target="_blank" rel="noreferrer">
+        <a href={REPO} target="_blank" rel="noreferrer">
           GitHub
+        </a>
+        <a href={`${REPO}/blob/main/CHANGELOG.md`} target="_blank" rel="noreferrer">
+          Changelog
         </a>
       </div>
     </footer>

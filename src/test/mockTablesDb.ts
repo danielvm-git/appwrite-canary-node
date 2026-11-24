@@ -36,7 +36,7 @@ export function createMockTablesDB() {
       calls.updateRow.push(params);
       return { $id: params.rowId, ...(params.data ?? {}) };
     }),
-    getRow: vi.fn(async (params: { databaseId: string; tableId: string; rowId: string }) => {
+    getRow: vi.fn(async (params: { databaseId: string; tableId: string; rowId: string }): Promise<Record<string, unknown>> => {
       calls.getRow.push(params);
       return { $id: params.rowId, userId: "u1", title: "Test", status: "open" };
     }),

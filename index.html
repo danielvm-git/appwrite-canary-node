@@ -1,12 +1,17 @@
 <!doctype html>
-<html lang="en" data-theme="dark" data-accent="canary">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Appwrite Canaries — Node</title>
-    <link rel="stylesheet" href="/shell/ds/colors_and_type.css" />
-    <link rel="stylesheet" href="/shell/ds/components.css" />
-    <link rel="stylesheet" href="/shell/ds/canary-layout.css" />
+    <title>Tasks · Todo API</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap" />
+    <script>
+      try {
+        var t = localStorage.getItem("tasks-theme");
+        if (t === "dark" || t === "light") document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

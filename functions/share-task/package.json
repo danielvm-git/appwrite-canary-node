@@ -1,0 +1,10 @@
+{
+  "name": "share-task",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "src/main.js",
+  "dependencies": {
+    "node-appwrite": "^32.0.0"
+  }
+}

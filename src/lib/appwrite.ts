@@ -1,5 +1,5 @@
 // story: todo-app
-import { Account, Client, ID, Storage, TablesDB } from "appwrite";
+import { Account, Client, Functions, ID, Storage, TablesDB } from "appwrite";
 
 const endpoint = import.meta.env.VITE_APPWRITE_ENDPOINT || "";
 const projectId = import.meta.env.VITE_APPWRITE_PROJECT_ID || "";
@@ -26,7 +26,12 @@ export function createStorage(): Storage {
   return new Storage(createClient());
 }
 
+export function createFunctions(): Functions {
+  return new Functions(createClient());
+}
+
 export const TODO_DATABASE_ID = "todo";
+export const SHARE_FUNCTION_ID = "share-task";
 export const LISTS_TABLE_ID = "lists";
 export const TASKS_TABLE_ID = "tasks";
 export const ATTACHMENTS_BUCKET_ID = "task-attachments";

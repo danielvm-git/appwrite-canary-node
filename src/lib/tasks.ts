@@ -9,16 +9,22 @@ import { clientLog } from "./log";
 import { buildTaskPatch, buildTaskRowData } from "./taskPayload";
 import { rowDocumentId } from "./rowId";
 
-export type TaskStatus = "open" | "done";
+export type TaskStatus = "open" | "doing" | "review" | "done";
+export type TaskPriority = "high" | "mid" | "low";
 
 export type Task = {
   $id: string;
+  $sequence?: string | number;
   title: string;
   notes?: string;
   status: TaskStatus;
+  priority?: TaskPriority;
   dueDate?: string;
   listId?: string;
   userId: string;
+  ownerName?: string;
+  sharedWith?: string[];
+  sharedNames?: string[];
   attachmentId?: string;
 };
 
@@ -26,10 +32,14 @@ export type TaskInput = {
   title: string;
   notes?: string;
   status?: TaskStatus;
+  priority?: TaskPriority;
   dueDate?: string;
   listId?: string;
+  ownerName?: string;
   attachmentId?: string;
 };
+
+const TASK_LIMIT = 500;
 
 function requireTaskId(taskId: string | undefined): string {
   const id = taskId?.trim();
@@ -37,41 +47,21 @@ function requireTaskId(taskId: string | undefined): string {
   return id;
 }
 
-export async function listTasksForUser(
-  userId: string,
-  opts?: { listId?: string; status?: TaskStatus; search?: string },
-): Promise<Task[]> {
-  const queries = [Query.equal("userId", userId), Query.orderDesc("$createdAt")];
-  if (opts?.listId) queries.push(Query.equal("listId", opts.listId));
-  if (opts?.status) queries.push(Query.equal("status", opts.status));
+function canAccess(task: Task, userId: string): boolean {
+  return task.userId === userId || (task.sharedWith ?? []).includes(userId);
+}
 
+/** Tasks the user owns plus tasks shared with them. */
+export async function listAccessibleTasks(userId: string): Promise<Task[]> {
   const db = createTablesDB();
-  const search = opts?.search?.trim();
-
-  if (search) {
-    try {
-      const result = await db.listRows({
-        databaseId: TODO_DATABASE_ID,
-        tableId: TASKS_TABLE_ID,
-        queries: [...queries, Query.search("title", search)],
-      });
-      return result.rows as unknown as Task[];
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      if (!message.includes("fulltext")) throw err;
-      const result = await db.listRows({
-        databaseId: TODO_DATABASE_ID,
-        tableId: TASKS_TABLE_ID,
-        queries: [...queries, Query.contains("title", search)],
-      });
-      return result.rows as unknown as Task[];
-    }
-  }
-
   const result = await db.listRows({
     databaseId: TODO_DATABASE_ID,
     tableId: TASKS_TABLE_ID,
-    queries,
+    queries: [
+      Query.or([Query.equal("userId", userId), Query.contains("sharedWith", [userId])]),
+      Query.orderDesc("$createdAt"),
+      Query.limit(TASK_LIMIT),
+    ],
   });
   return result.rows as unknown as Task[];
 }
@@ -105,14 +95,7 @@ export async function createTask(userId: string, input: TaskInput): Promise<Task
   }
 }
 
-export async function updateTask(
-  userId: string,
-  taskId: string | undefined,
-  patch: Partial<TaskInput>,
-): Promise<Task> {
-  const id = requireTaskId(taskId);
-  const existing = await getTask(id);
-  if (existing.userId !== userId) throw new Error("Not allowed");
+async function writePatch(id: string, patch: Partial<TaskInput>, operation: string): Promise<Task> {
   const db = createTablesDB();
   try {
     const row = await db.updateRow({
@@ -123,18 +106,35 @@ export async function updateTask(
     });
     return row as unknown as Task;
   } catch (err) {
-    clientLog.error("tasks.updateRow failed", err, {
-      tableId: TASKS_TABLE_ID,
-      operation: "updateTask",
-      rowId: id,
-    });
+    clientLog.error("tasks.updateRow failed", err, { tableId: TASKS_TABLE_ID, operation, rowId: id });
     throw err;
   }
 }
 
+/** Owners edit every field; collaborators may only change status. */
+export async function updateTask(
+  userId: string,
+  taskId: string | undefined,
+  patch: Partial<TaskInput>,
+): Promise<Task> {
+  const id = requireTaskId(taskId);
+  const existing = await getTask(id);
+  if (!canAccess(existing, userId)) throw new Error("Not allowed");
+  const onlyStatus = Object.keys(patch).every((k) => k === "status");
+  if (existing.userId !== userId && !onlyStatus) {
+    throw new Error("Only the owner can edit this task");
+  }
+  return writePatch(id, patch, "updateTask");
+}
+
+export async function setTaskStatus(userId: string, task: Task, status: TaskStatus): Promise<Task> {
+  const id = requireTaskId(task.$id);
+  if (!canAccess(task, userId)) throw new Error("Not allowed");
+  return writePatch(id, { status }, "setTaskStatus");
+}
+
 export async function toggleTaskStatus(userId: string, task: Task): Promise<Task> {
-  const next: TaskStatus = task.status === "done" ? "open" : "done";
-  return updateTask(userId, task.$id, { status: next });
+  return setTaskStatus(userId, task, task.status === "done" ? "open" : "done");
 }
 
 export async function deleteTask(userId: string, taskId: string | undefined): Promise<void> {
@@ -147,21 +147,4 @@ export async function deleteTask(userId: string, taskId: string | undefined): Pr
     tableId: TASKS_TABLE_ID,
     rowId: id,
   });
-}
-
-export async function countTasksByStatus(userId: string): Promise<{ open: number; done: number }> {
-  const db = createTablesDB();
-  const [openList, doneList] = await Promise.all([
-    db.listRows({
-      databaseId: TODO_DATABASE_ID,
-      tableId: TASKS_TABLE_ID,
-      queries: [Query.equal("userId", userId), Query.equal("status", "open")],
-    }),
-    db.listRows({
-      databaseId: TODO_DATABASE_ID,
-      tableId: TASKS_TABLE_ID,
-      queries: [Query.equal("userId", userId), Query.equal("status", "done")],
-    }),
-  ]);
-  return { open: openList.total, done: doneList.total };
 }
