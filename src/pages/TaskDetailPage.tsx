@@ -13,8 +13,8 @@ export function TaskDetailPage() {
   const { taskId } = useParams();
   const isNew = taskId === "new";
   const navigate = useNavigate();
-  const { user } = useSession();
-  const userId = user!.$id;
+  const { user, loading } = useSession();
+  const userId = user?.$id ?? "";
 
   const [lists, setLists] = useState<TodoList[]>([]);
   const [title, setTitle] = useState("");
@@ -27,6 +27,7 @@ export function TaskDetailPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    if (!userId) return;
     void listListsForUser(userId).then(setLists);
   }, [userId]);
 
@@ -103,6 +104,8 @@ export function TaskDetailPage() {
       setError(err instanceof Error ? err.message : "Remove failed");
     }
   }
+
+  if (loading || !user) return null;
 
   return (
     <section>

@@ -14,8 +14,8 @@ import {
 export function TasksPage() {
   const { listId: listIdParam } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { user } = useSession();
-  const userId = user!.$id;
+  const { user, loading } = useSession();
+  const userId = user?.$id ?? "";
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [lists, setLists] = useState<TodoList[]>([]);
@@ -49,6 +49,7 @@ export function TasksPage() {
   }
 
   useEffect(() => {
+    if (!userId) return;
     void reload();
   }, [userId, listId, statusFilter, search]);
 
@@ -77,6 +78,8 @@ export function TasksPage() {
   }
 
   const heading = listIdParam && listName ? `Tasks in ${listName}` : "All tasks";
+
+  if (loading || !user) return null;
 
   return (
     <section>
