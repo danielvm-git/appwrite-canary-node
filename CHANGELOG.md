@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- big-release managed -->
 
+## [1.3.2] - 2026-11-24
+
+### Fixed
+
+- **fix:** todo TablesDB contracts tests rowId guards and search fallback ([#14](https://github.com/danielvm-git/appwrite-canary-node/issues/14)) ([ba5c252](https://github.com/danielvm-git/appwrite-canary-node/commit/ba5c252580b1a9796fdee50f8904ba79fd626c9c))
+
 ## [1.3.1] - 2026-11-24
 
 ### Fixed
