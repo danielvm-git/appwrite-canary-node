@@ -12,6 +12,6 @@ echo "$js" | grep -q 'Hello World'
 echo "$js" | grep -q "v$VER"
 health="$(curl -skS "$BASE/health.json")"
 echo "$health" | grep -q '"status"'
-echo "$health" | grep -q "\"version\""
+echo "$health" | grep -q '"version"'
 echo "$health" | grep -q "$VER"
 echo "smoke OK v$VER @ $BASE"
