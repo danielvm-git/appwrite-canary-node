@@ -1,7 +1,12 @@
 import { ATTACHMENTS_BUCKET_ID, createStorage, newId } from "./appwrite";
 export async function uploadAttachment(_userId: string, file: File): Promise<string> {
   const storage = createStorage();
-  const created = await storage.createFile(ATTACHMENTS_BUCKET_ID, newId(), file);
+  const fileId = newId();
+  const created = await storage.createFile({
+    bucketId: ATTACHMENTS_BUCKET_ID,
+    fileId,
+    file,
+  });
   return created.$id;
 }
 

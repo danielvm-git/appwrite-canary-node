@@ -69,9 +69,18 @@ export function TaskDetailPage() {
       if (isNew) {
         task = await createTask(userId, payload);
       } else {
-        task = await updateTask(userId, taskId!, payload);
+        if (!taskId || taskId === "new") {
+          setError("Missing task id");
+          return;
+        }
+        task = await updateTask(userId, taskId, payload);
       }
-      navigate(`/tasks/${task.$id}`, { replace: true });
+      const savedId = task.$id;
+      if (!savedId) {
+        setError("Task saved but id is missing in response");
+        return;
+      }
+      navigate(`/tasks/${savedId}`, { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Save failed");
     } finally {
@@ -87,7 +96,8 @@ export function TaskDetailPage() {
     try {
       if (attachmentId) await deleteAttachment(attachmentId);
       const fileId = await uploadAttachment(userId, file);
-      await updateTask(userId, taskId!, { attachmentId: fileId });
+      if (!taskId || taskId === "new") return;
+      await updateTask(userId, taskId, { attachmentId: fileId });
       setAttachmentId(fileId);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed");
@@ -98,7 +108,8 @@ export function TaskDetailPage() {
     if (!attachmentId || isNew) return;
     try {
       await deleteAttachment(attachmentId);
-      await updateTask(userId, taskId!, { attachmentId: "" });
+      if (!taskId || taskId === "new") return;
+      await updateTask(userId, taskId, { attachmentId: "" });
       setAttachmentId("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Remove failed");
