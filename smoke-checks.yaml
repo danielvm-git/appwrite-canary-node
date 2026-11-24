@@ -1,0 +1,11 @@
+base_url: "https://node.danielvm.net"
+checks:
+  - name: Homepage Hello World
+    path: "/"
+    expected_status: 200
+    content_signal: "Hello World"
+    max_response_time_ms: 8000
+  - name: Health JSON
+    path: "/health.json"
+    expected_status: 200
+    content_signal: "ok"

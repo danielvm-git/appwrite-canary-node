@@ -1,0 +1,18 @@
+id: e01
+title: "Walking skeleton"
+wsjf: 9.2
+total_bcps: 11
+status: planning
+stories:
+  - id: e01s01
+    title: "Repo prep + Hello World build (branch)"
+    bcps: 5
+    status: todo
+    spec: e01s01.md
+    tasks: e01s01-tasks.yaml
+  - id: e01s02
+    title: "feat: first release deploy Hello World"
+    bcps: 6
+    status: todo
+    spec: e01s02.md
+    tasks: e01s02-tasks.yaml

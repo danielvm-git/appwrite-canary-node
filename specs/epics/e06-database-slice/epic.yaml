@@ -1,0 +1,12 @@
+id: e06
+title: "Database vertical slice"
+wsjf: 4.5
+total_bcps: 6
+status: planning
+stories:
+  - id: e06s01
+    title: "feat: database list/create slice"
+    bcps: 6
+    status: todo
+    spec: e06s01.md
+    tasks: e06s01-tasks.yaml

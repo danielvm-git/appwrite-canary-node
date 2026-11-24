@@ -1,0 +1,12 @@
+id: e07
+title: "Storage vertical slice"
+wsjf: 4.0
+total_bcps: 6
+status: planning
+stories:
+  - id: e07s01
+    title: "feat: bucket upload vertical slice"
+    bcps: 6
+    status: todo
+    spec: e07s01.md
+    tasks: e07s01-tasks.yaml

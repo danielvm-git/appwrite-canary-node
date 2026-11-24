@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+msg=$(cat "$1")
+if echo "$msg" | rg -qi 'Co-authored-by'; then
+  echo "reject: Co-authored-by not allowed" >&2
+  exit 1
+fi
+pat='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore)(\([a-z0-9_-]+\))?!?: .+'
+if ! echo "$msg" | rg -qi "$pat"; then
+  echo "reject: use Conventional Commits (feat|fix|...): subject" >&2
+  exit 1
+fi
