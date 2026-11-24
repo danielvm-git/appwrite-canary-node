@@ -32,6 +32,11 @@ export function TasksPage() {
     [lists, listId],
   );
 
+  function listLabel(taskListId?: string): string {
+    if (!taskListId?.trim()) return "Inbox";
+    return lists.find((l) => l.$id === taskListId)?.name ?? "Inbox";
+  }
+
   async function reload() {
     if (!userId) return;
     try {
@@ -178,7 +183,13 @@ export function TasksPage() {
                     )}
                   </td>
                   <td>{task.status}</td>
-                  <td className="mono">{task.listId || "—"}</td>
+                  <td>
+                    {task.listId ? (
+                      <Link to={`/lists/${task.listId}`}>{listLabel(task.listId)}</Link>
+                    ) : (
+                      "Inbox"
+                    )}
+                  </td>
                   <td className="mono">{task.dueDate ? task.dueDate.slice(0, 10) : "—"}</td>
                   <td>
                     <button type="button" className="btn btn-ghost" onClick={() => void onToggle(task)}>
