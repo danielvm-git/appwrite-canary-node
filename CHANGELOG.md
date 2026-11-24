@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- big-release managed -->
 
+## [1.1.1] - 2026-11-24
+
+### Fixed
+
+- **fix:** pin shell assets at v1.0.0 ([#5](https://github.com/danielvm-git/appwrite-canary-node/issues/5)) ([6540793](https://github.com/danielvm-git/appwrite-canary-node/commit/65407935c864c5249086a30a12a3520e753277ec))
+
 ## [1.1.0] - 2026-11-24
 
 ### Added
