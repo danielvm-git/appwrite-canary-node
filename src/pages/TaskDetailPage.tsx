@@ -6,16 +6,21 @@ import {
   deleteAttachment,
   uploadAttachment,
 } from "../lib/attachments";
+import { clientLog } from "../lib/log";
 import { listListsForUser, type TodoList } from "../lib/lists";
+import { routeOrRowId, rowDocumentId } from "../lib/rowId";
 import { createTask, getTask, updateTask, type Task, type TaskStatus } from "../lib/tasks";
 
 export function TaskDetailPage() {
-  const { taskId } = useParams();
-  const isNew = taskId === "new";
+  const { taskId: routeTaskId } = useParams();
+  const isNew = routeTaskId === "new" || !routeTaskId;
   const navigate = useNavigate();
   const { user, loading } = useSession();
   const userId = user?.$id ?? "";
 
+  const [rowId, setRowId] = useState<string | undefined>(
+    routeTaskId && routeTaskId !== "new" ? routeTaskId : undefined,
+  );
   const [lists, setLists] = useState<TodoList[]>([]);
   const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
@@ -27,19 +32,24 @@ export function TaskDetailPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    if (routeTaskId && routeTaskId !== "new") setRowId(routeTaskId);
+  }, [routeTaskId]);
+
+  useEffect(() => {
     if (!userId) return;
     void listListsForUser(userId).then(setLists);
   }, [userId]);
 
   useEffect(() => {
-    if (isNew || !taskId) return;
+    if (isNew || !rowId) return;
     void (async () => {
       try {
-        const task = await getTask(taskId);
+        const task = await getTask(rowId);
         if (task.userId !== userId) {
           setError("Not found");
           return;
         }
+        setRowId(rowDocumentId(task));
         setTitle(task.title);
         setNotes(task.notes ?? "");
         setStatus(task.status ?? "open");
@@ -47,10 +57,15 @@ export function TaskDetailPage() {
         setListId(task.listId ?? "");
         setAttachmentId(task.attachmentId ?? "");
       } catch (err) {
+        clientLog.error("task detail load failed", err, { operation: "getTask", rowId });
         setError(err instanceof Error ? err.message : "Failed to load task");
       }
     })();
-  }, [isNew, taskId, userId]);
+  }, [isNew, rowId, userId]);
+
+  function effectiveTaskId(): string {
+    return routeOrRowId(routeTaskId, rowId);
+  }
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
@@ -69,19 +84,13 @@ export function TaskDetailPage() {
       if (isNew) {
         task = await createTask(userId, payload);
       } else {
-        if (!taskId || taskId === "new") {
-          setError("Missing task id");
-          return;
-        }
-        task = await updateTask(userId, taskId, payload);
+        task = await updateTask(userId, effectiveTaskId(), payload);
       }
-      const savedId = task.$id;
-      if (!savedId) {
-        setError("Task saved but id is missing in response");
-        return;
-      }
+      const savedId = rowDocumentId(task);
+      setRowId(savedId);
       navigate(`/tasks/${savedId}`, { replace: true });
     } catch (err) {
+      clientLog.error("task save failed", err, { operation: "saveTask", routeTaskId, rowId });
       setError(err instanceof Error ? err.message : "Save failed");
     } finally {
       setSaving(false);
@@ -94,12 +103,13 @@ export function TaskDetailPage() {
     const file = input.files?.[0];
     if (!file || isNew) return;
     try {
+      const id = effectiveTaskId();
       if (attachmentId) await deleteAttachment(attachmentId);
       const fileId = await uploadAttachment(userId, file);
-      if (!taskId || taskId === "new") return;
-      await updateTask(userId, taskId, { attachmentId: fileId });
+      await updateTask(userId, id, { attachmentId: fileId });
       setAttachmentId(fileId);
     } catch (err) {
+      clientLog.error("attachment upload failed", err, { operation: "uploadAttachment" });
       setError(err instanceof Error ? err.message : "Upload failed");
     }
   }
@@ -108,8 +118,7 @@ export function TaskDetailPage() {
     if (!attachmentId || isNew) return;
     try {
       await deleteAttachment(attachmentId);
-      if (!taskId || taskId === "new") return;
-      await updateTask(userId, taskId, { attachmentId: "" });
+      await updateTask(userId, effectiveTaskId(), { attachmentId: "" });
       setAttachmentId("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Remove failed");
