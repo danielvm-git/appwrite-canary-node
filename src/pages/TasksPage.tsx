@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useSession } from "../hooks/useSession";
 import { listListsForUser, type TodoList } from "../lib/lists";
+import { clientLog } from "../lib/log";
 import {
   countTasksByStatus,
   deleteTask,
@@ -44,6 +45,7 @@ export function TasksPage() {
       setCounts(statusCounts);
       setError(null);
     } catch (err) {
+      clientLog.error("tasks list failed", err, { operation: "listTasksForUser" });
       setError(err instanceof Error ? err.message : "Failed to load tasks");
     }
   }
@@ -169,7 +171,11 @@ export function TasksPage() {
               {tasks.map((task) => (
                 <tr key={task.$id}>
                   <td>
-                    <Link to={`/tasks/${task.$id}`}>{task.title}</Link>
+                    {task.$id ? (
+                      <Link to={`/tasks/${task.$id}`}>{task.title}</Link>
+                    ) : (
+                      <span>{task.title}</span>
+                    )}
                   </td>
                   <td>{task.status}</td>
                   <td className="mono">{task.listId || "—"}</td>

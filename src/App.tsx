@@ -14,13 +14,13 @@ export function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/console/*" element={<Navigate to="/tasks" replace />} />
         <Route element={<AppLayout />}>
-          <Route path="/tasks" element={<TasksPage />} />
-          <Route path="/tasks/new" element={<TaskDetailPage />} />
-          <Route path="/tasks/:taskId" element={<TaskDetailPage />} />
-          <Route path="/lists" element={<ListsPage />} />
-          <Route path="/lists/:listId" element={<TasksPage />} />
-          <Route path="/account" element={<AccountPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="tasks" element={<TasksPage />} />
+          <Route path="tasks/new" element={<TaskDetailPage />} />
+          <Route path="tasks/:taskId" element={<TaskDetailPage />} />
+          <Route path="lists" element={<ListsPage />} />
+          <Route path="lists/:listId" element={<TasksPage />} />
+          <Route path="account" element={<AccountPage />} />
+          <Route path="settings" element={<SettingsPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
