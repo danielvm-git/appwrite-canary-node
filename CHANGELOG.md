@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- big-release managed -->
 
+## [1.1.0] - 2026-11-24
+
+### Added
+
+- **feat:** overview slice status and combined slice verify ([#4](https://github.com/danielvm-git/appwrite-canary-node/issues/4)) ([2ec013a](https://github.com/danielvm-git/appwrite-canary-node/commit/2ec013abe40f071b9e9669c1e174fb5ae6d1ba82))
+
 ## [1.0.1] - 2026-11-24
 
 ### Fixed
