@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- big-release managed -->
 
+## [1.3.4] - 2026-11-24
+
+### Fixed
+
+- **fix:** show list name instead of raw list id in tasks table ([#17](https://github.com/danielvm-git/appwrite-canary-node/issues/17)) ([8872a89](https://github.com/danielvm-git/appwrite-canary-node/commit/8872a89fff8764ef1e2a2ba942da81c207956307))
+
 ## [1.3.3] - 2026-11-24
 
 ### Fixed
