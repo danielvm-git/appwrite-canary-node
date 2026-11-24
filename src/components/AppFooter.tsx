@@ -1,11 +1,16 @@
-// story: e01s02
-const REPO = "https://github.com/danielvm-git/appwrite-canary-node";
+// story: e03s02 — canary build env
+const DEFAULT_REPO = "https://github.com/danielvm-git/appwrite-canary-shell";
 
 export function AppFooter({ testId }: { testId: string }) {
   const version = __APP_VERSION__;
+  const canaryName = import.meta.env.VITE_CANARY_NAME || "Tasks";
+  const productLabel = import.meta.env.VITE_PRODUCT_LABEL || "Todo API";
+  const repoUrl = import.meta.env.VITE_REPO_URL || DEFAULT_REPO;
   return (
     <footer className="app-footer" data-testid={testId}>
-      <span>© 2026 Tasks · Todo API</span>
+      <span>
+        © 2026 {canaryName} · {productLabel}
+      </span>
       <div className="app-footer-meta">
         <span>v{version}</span>
         <span>
@@ -18,10 +23,10 @@ export function AppFooter({ testId }: { testId: string }) {
             danielvm-git
           </a>
         </span>
-        <a href={REPO} target="_blank" rel="noreferrer">
+        <a href={repoUrl} target="_blank" rel="noreferrer">
           GitHub
         </a>
-        <a href={`${REPO}/blob/main/CHANGELOG.md`} target="_blank" rel="noreferrer">
+        <a href={`${repoUrl}/blob/main/CHANGELOG.md`} target="_blank" rel="noreferrer">
           Changelog
         </a>
       </div>

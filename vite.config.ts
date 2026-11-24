@@ -6,7 +6,7 @@ import { defineConfig } from "vite";
 function appVersion(): string {
   if (process.env.APP_VERSION) return process.env.APP_VERSION;
   try {
-    const versionPath = fileURLToPath(new URL("./VERSION", import.meta.url));
+    const versionPath = fileURLToPath(new URL("../VERSION", import.meta.url));
     return readFileSync(versionPath, "utf-8").trim();
   } catch {
     return "dev";
