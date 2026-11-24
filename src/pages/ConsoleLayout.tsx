@@ -1,5 +1,8 @@
 // story: e01s02
-import { NavLink, Outlet } from "react-router-dom";
+import { useState } from "react";
+import { Navigate, NavLink, Outlet, useNavigate } from "react-router-dom";
+import { useSession } from "../hooks/useSession";
+import { appwriteConfigured } from "../lib/appwrite";
 import { AppFooter } from "../components/AppFooter";
 import { useShellView } from "../hooks/useShellView";
 
@@ -26,7 +29,21 @@ function navClass({ isActive }: { isActive: boolean }, stub?: boolean) {
 
 export function ConsoleLayout() {
   useShellView("console");
+  const navigate = useNavigate();
+  const { loading, user, signOut } = useSession();
+  const [menuOpen, setMenuOpen] = useState(false);
   const projectId = import.meta.env.VITE_APPWRITE_PROJECT_ID || "6b04b29a…5784";
+
+  if (loading) return null;
+  if (appwriteConfigured() && !user) return <Navigate to="/" replace />;
+
+  const name = user?.name || user?.email || "Guest";
+  const initial = name.charAt(0).toUpperCase();
+
+  async function onSignOut() {
+    await signOut();
+    navigate("/", { replace: true });
+  }
 
   return (
     <div className="view-console">
@@ -44,6 +61,36 @@ export function ConsoleLayout() {
           <span className="chip mono" title="Project ID">
             {projectId.length > 14 ? `${projectId.slice(0, 8)}…${projectId.slice(-4)}` : projectId}
           </span>
+          <div className="profile-wrap">
+            <button
+              type="button"
+              className={`profile-trigger${menuOpen ? " open" : ""}`}
+              aria-expanded={menuOpen}
+              aria-haspopup="true"
+              onClick={() => setMenuOpen(!menuOpen)}
+            >
+              <span className="avatar" aria-hidden="true">{initial}</span>
+              <span className="profile-name">{name}</span>
+              <span className="profile-chev">▼</span>
+            </button>
+            <div className={`profile-menu${menuOpen ? " open" : ""}`} role="menu">
+              <div className="profile-menu-head">
+                <span className="avatar">{initial}</span>
+                <div>
+                  <strong>{name}</strong>
+                  <span>{user?.email ?? ""}</span>
+                </div>
+              </div>
+              <div className="menu-meta">
+                Account status <span className="active-dot">● Active</span>
+                <br />
+                <span className="mono">{user?.$id ?? ""}</span>
+              </div>
+              <button type="button" className="menu-item menu-signout" role="menuitem" onClick={onSignOut}>
+                Sign out
+              </button>
+            </div>
+          </div>
         </div>
       </header>
       <div className="shell">
