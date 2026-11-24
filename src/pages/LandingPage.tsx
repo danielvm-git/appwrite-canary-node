@@ -14,14 +14,14 @@ export function LandingPage() {
       <div className="landing-layout">
         <div className="landing-pane landing-pane--main">
           <main className="landing-hero">
-            <h1>Hello World</h1>
+            <h1>Todo app</h1>
             <p className="lead">
-              Appwrite Canaries — Node pilot (staging at node-staging.danielvm.net).
+              Appwrite Canaries — Node reference app with Auth, TablesDB, and Storage.
             </p>
             <ul className="landing-bullets">
-              <li>Production: node.danielvm.net</li>
-              <li>Staging: node-staging.danielvm.net</li>
-              <li>Console: Auth, Database, Storage slices</li>
+              <li>Tasks and lists with owner-only permissions</li>
+              <li>File attachments per task</li>
+              <li>Hosted at node.danielvm.net</li>
             </ul>
           </main>
           <footer className="site-footer" aria-label="Marketing links">
@@ -30,13 +30,13 @@ export function LandingPage() {
                 <h4>Product</h4>
                 <ul>
                   <li>
-                    <Link to="/console/auth">Auth</Link>
+                    <Link to="/tasks">Tasks</Link>
                   </li>
                   <li>
-                    <Link to="/console/database">Database</Link>
+                    <Link to="/lists">Lists</Link>
                   </li>
                   <li>
-                    <Link to="/console/storage">Storage</Link>
+                    <Link to="/settings">Settings</Link>
                   </li>
                 </ul>
               </div>
@@ -61,7 +61,7 @@ function LoginCard() {
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user) navigate("/console", { replace: true });
+    if (user) navigate("/tasks", { replace: true });
   }, [user, navigate]);
 
   async function onSubmit(event: FormEvent) {
@@ -74,7 +74,7 @@ function LoginCard() {
     try {
       if (register) await account.create(newId(), email, password);
       await account.createEmailPasswordSession(email, password);
-      navigate("/console");
+      navigate("/tasks");
     } catch (error) {
       const msg = error instanceof Error ? error.message : "Sign in failed";
       setMessage(msg.includes("Invalid credentials") ? "Invalid email or password" : msg);
