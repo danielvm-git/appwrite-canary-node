@@ -1,32 +1,30 @@
-core_value: "Deliver vertical slices with explicit VERSION lineage per node canary."
+core_value: "Pilot Todo app on Appwrite; reference for parity ADR; consumes shell frontend after e09s02."
 
 summary: |
-  Repository **appwrite-canary-node**. Stack: Vite + Appwrite Sites.
-  First user-visible value: Hello World + v0.1.0 on node.danielvm.net (or static preview for shell).
-  Version evolution is owned by this repo's release-plan (not shared with other canaries).
+  Repository **appwrite-canary-node**. Stack: Vite React SPA + Appwrite Functions (`share-task`, node-22).
+  Production: full Todo on node.danielvm.net (e09s01 shipped).
+  Next: e09s02 sync frontend from appwrite-canary-shell without visual regression.
 
 in_scope:
-  - Epics e01–e0N in this repo's release-plan.yaml
-  - CI preflight gate before deploy (wire-ci, observability, hooks as tasks)
-  - smoke-checks.yaml proving version on production URL
+  - Epics e01–e09 in release-plan.yaml
+  - Shared TablesDB `todo` and bucket `task-attachments`
+  - verify-todo-live, observability, smoke for Todo UI
+  - e09s02 shell consumer after shell e03
 
 out_of_scope:
-  - Implementing other language canaries
-  - BigBase API deploy
-  - GSD planning artifacts
+  - Other language canaries' function code
+  - Separate todo database for node
 
 constraints:
   - Conventional Commits; no Co-authored-by
-  - Host layer 1 in ../../../specs/platform/host-preflight.yaml must pass
-  - VERSION file is written only by big-release prepare, never hand-edited on main
-  - First production version comes from first `feat:` merge (expected 0.1.0 via initialVersion)
+  - Host layer 1 in ../../../specs/platform/host-preflight.yaml
+  - [`TODO_APP_REQUIREMENTS`](../../../specs/product/TODO_APP_REQUIREMENTS.md)
 
 success_criteria:
-  - Production URL shows Hello World and tag-matching version after e01s02
-  - fix commit produces next patch visible on site after e02s01
-  - Program ends at v1.0.0 after e08s01
-  - Each epic bump documented in VERSION + footer
+  - e09s01: live Todo per requirements doc (done)
+  - e09s02: synced shell app; smoke passes; layout unchanged
 
 references:
   - ../../../specs/program.yaml
-  - ../../../specs/platform/HOST_SETUP.md
+  - ../../../specs/adr/ADR-ACAN-node-todo-app.md
+  - ../../../specs/product/TODO_APP_REQUIREMENTS.md
