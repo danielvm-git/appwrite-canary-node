@@ -12,7 +12,8 @@
     "test": "vitest run",
     "lint": "eslint src",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "preflight": "npm run typecheck && npm run lint && npm test"
+    "preflight": "npm run typecheck && npm run lint && npm test",
+    "test:data": "vitest run src/lib/tasks.test.ts src/lib/lists.test.ts src/lib/taskPayload.test.ts src/lib/attachments.test.ts"
   },
   "dependencies": {
     "appwrite": "^21.0.0",
