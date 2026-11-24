@@ -8,4 +8,4 @@ checks:
   - name: Health JSON
     path: "/health.json"
     expected_status: 200
-    content_signal: "ok"
+    content_signal: '"version"'

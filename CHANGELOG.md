@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- big-release managed -->
 
+## [1.0.0] - 2026-11-24
+
+### Changed
+
+- **feat:** stable canary with staging and vertical slices ([#2](https://github.com/danielvm-git/appwrite-canary-node/issues/2)) ([0b561fe](https://github.com/danielvm-git/appwrite-canary-node/commit/0b561fe9307934f092496e992b99b760f0ee2529))
+
 ## [0.1.1] - 2026-11-24
 
 ### Fixed

@@ -10,5 +10,8 @@ asset="$(echo "$html" | grep -oE '/assets/index-[^"]+\.js' | head -1)"
 js="$(curl -skS "$BASE$asset")"
 echo "$js" | grep -q 'Hello World'
 echo "$js" | grep -q "v$VER"
-curl -skS "$BASE/health.json" | grep -q '"status"'
+health="$(curl -skS "$BASE/health.json")"
+echo "$health" | grep -q '"status"'
+echo "$health" | grep -q "\"version\""
+echo "$health" | grep -q "$VER"
 echo "smoke OK v$VER @ $BASE"
