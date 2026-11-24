@@ -60,14 +60,15 @@ curl_key POST "$APPWRITE_ENDPOINT/users" \
 curl_key POST "$APPWRITE_ENDPOINT/users" \
   -d "{\"userId\":\"$UID_B\",\"email\":\"$U2\",\"password\":\"$PW\",\"name\":\"B\"}" >/dev/null
 
-sid_for() {
-  curl_json POST "$APPWRITE_ENDPOINT/account/sessions/email" \
-    -d "{\"email\":\"$1\",\"password\":\"$PW\"}" \
-    | python3 -c 'import json,sys; print(json.load(sys.stdin)["$id"])'
+# X-Appwrite-Session needs the session secret, which only server-created sessions return.
+secret_for() {
+  curl_key POST "$APPWRITE_ENDPOINT/users/$1/sessions" \
+    | python3 -c 'import json,sys; print(json.load(sys.stdin)["secret"])'
 }
 
-S1="$(sid_for "$U1")"
-S2="$(sid_for "$U2")"
+S1="$(secret_for "$UID_A")"
+S2="$(secret_for "$UID_B")"
+[[ -n "$S1" && -n "$S2" ]] || { echo "session secrets missing" >&2; exit 1; }
 UID1="$UID_A"
 
 echo "== create task row as user A =="
@@ -79,6 +80,10 @@ ROW_ID="$(echo "$ROW_JSON" | python3 -c 'import json,sys; d=json.load(sys.stdin)
   exit 1
 }
 echo "row=$ROW_ID"
+echo "$ROW_JSON" | grep -q "user:$UID1" || {
+  echo "FAIL: row has no owner permissions (request ran as guest?): $ROW_JSON" >&2
+  exit 1
+}
 
 echo "== user B read must fail =="
 code="$(curl_session GET "$APPWRITE_ENDPOINT/tablesdb/todo/tables/tasks/rows/$ROW_ID" "$S2" \
@@ -89,4 +94,47 @@ if [[ "$code" == "200" ]]; then
   exit 1
 fi
 echo "blocked HTTP $code"
+
+share_as() {
+  local session="$1"
+  local email="$2"
+  local payload
+  payload="$(python3 -c 'import json,sys; print(json.dumps({"async":False,"method":"POST","headers":{"content-type":"application/json"},"body":json.dumps({"taskId":sys.argv[1],"email":sys.argv[2]})}))' "$ROW_ID" "$email")"
+  curl_session POST "$APPWRITE_ENDPOINT/functions/share-task/executions" "$session" -d "$payload" \
+    | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d.get("responseBody") or json.dumps(d))'
+}
+
+expect_share() {
+  local label="$1"
+  local want="$2"
+  local body="$3"
+  echo "$body" | grep -q "$want" || {
+    echo "FAIL: $label expected $want got $body" >&2
+    exit 1
+  }
+  echo "$label: $want"
+}
+
+echo "== share-task function =="
+expect_share "A shares with B" '"ok":true' "$(share_as "$S1" "$U2")"
+expect_share "A shares twice" '"code":"already"' "$(share_as "$S1" "$U2")"
+expect_share "A shares with self" '"code":"self"' "$(share_as "$S1" "$U1")"
+expect_share "B re-shares" '"code":"forbidden"' "$(share_as "$S2" "$U1")"
+
+code="$(curl_session GET "$APPWRITE_ENDPOINT/tablesdb/todo/tables/tasks/rows/$ROW_ID" "$S2" -o /dev/null -w '%{http_code}')"
+[[ "$code" == "200" ]] || { echo "FAIL: shared read HTTP $code" >&2; exit 1; }
+echo "B reads shared row: 200"
+
+code="$(curl_session PATCH "$APPWRITE_ENDPOINT/tablesdb/todo/tables/tasks/rows/$ROW_ID" "$S2" \
+  -d '{"data":{"status":"review"}}' -o /dev/null -w '%{http_code}')"
+[[ "$code" == "200" ]] || { echo "FAIL: shared status update HTTP $code" >&2; exit 1; }
+echo "B moves status to review: 200"
+
+code="$(curl_session DELETE "$APPWRITE_ENDPOINT/tablesdb/todo/tables/tasks/rows/$ROW_ID" "$S2" -o /dev/null -w '%{http_code}')"
+[[ "$code" != "204" && "$code" != "200" ]] || { echo "FAIL: shared user deleted row" >&2; exit 1; }
+echo "B delete blocked: HTTP $code"
+
+curl_session DELETE "$APPWRITE_ENDPOINT/tablesdb/todo/tables/tasks/rows/$ROW_ID" "$S1" -o /dev/null
+curl_key DELETE "$APPWRITE_ENDPOINT/users/$UID_A" -o /dev/null
+curl_key DELETE "$APPWRITE_ENDPOINT/users/$UID_B" -o /dev/null
 echo "verify-todo-live: OK"

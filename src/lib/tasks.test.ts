@@ -13,7 +13,8 @@ vi.mock("./appwrite", () => ({
 import {
   createTask,
   deleteTask,
-  listTasksForUser,
+  listAccessibleTasks,
+  setTaskStatus,
   toggleTaskStatus,
   updateTask,
 } from "./tasks";
@@ -53,14 +54,30 @@ describe("tasks TablesDB contracts", () => {
     await expect(deleteTask("u1", "t1")).rejects.toThrow(/Not allowed/);
   });
 
-  it("SC-todo-P1-04 falls back to contains when fulltext search fails", async () => {
-    mock.db.listRows
-      .mockRejectedValueOnce(new Error('Searching by attribute "title" requires a fulltext index'))
-      .mockResolvedValueOnce({ rows: [{ $id: "1", title: "Task 1" } as never], total: 1 });
+  it("SC-todo-P1-04 lists owned and shared tasks in one query", async () => {
+    await listAccessibleTasks("u1");
+    const queries = (mock.calls.listRows.at(-1)?.queries ?? []) as string[];
+    const or = JSON.parse(queries[0]);
+    expect(or.method).toBe("or");
+    const nested = or.values.map((q: unknown) => (typeof q === "string" ? JSON.parse(q) : q));
+    expect(nested).toEqual([
+      expect.objectContaining({ method: "equal", attribute: "userId", values: ["u1"] }),
+      expect.objectContaining({ method: "contains", attribute: "sharedWith", values: ["u1"] }),
+    ]);
+  });
 
-    const rows = await listTasksForUser("u1", { search: "Task" });
-    expect(rows).toHaveLength(1);
-    expect(mock.db.listRows).toHaveBeenCalledTimes(2);
+  it("SC-todo-share collaborators may change status only", async () => {
+    mock.db.getRow.mockResolvedValue({ $id: "t1", userId: "owner", sharedWith: ["u1"], title: "X", status: "open" });
+    await expect(updateTask("u1", "t1", { status: "review" })).resolves.toMatchObject({ status: "review" });
+    await expect(updateTask("u1", "t1", { title: "Hijack" })).rejects.toThrow(/Only the owner/);
+    mock.db.getRow.mockReset();
+  });
+
+  it("SC-todo-share strangers cannot change status", async () => {
+    await expect(
+      setTaskStatus("u1", { $id: "t1", title: "X", status: "open", userId: "owner" }, "done"),
+    ).rejects.toThrow(/Not allowed/);
+    expect(mock.calls.updateRow).toHaveLength(0);
   });
 
   it("toggles status", async () => {

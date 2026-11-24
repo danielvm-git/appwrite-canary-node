@@ -1,97 +1,103 @@
-import { FormEvent, useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { useSession } from "../hooks/useSession";
-import {
-  attachmentDownloadUrl,
-  deleteAttachment,
-  uploadAttachment,
-} from "../lib/attachments";
+import { AvatarStack, Icon, StatusBadge } from "../components/ui";
+import { useTodo } from "../hooks/useTodo";
+import { attachmentDownloadUrl, deleteAttachment, uploadAttachment } from "../lib/attachments";
 import { clientLog } from "../lib/log";
-import { listListsForUser, type TodoList } from "../lib/lists";
-import { routeOrRowId, rowDocumentId } from "../lib/rowId";
-import { createTask, getTask, updateTask, type Task, type TaskStatus } from "../lib/tasks";
+import { getTask, updateTask, type Task, type TaskInput, type TaskPriority, type TaskStatus } from "../lib/tasks";
+import { PRIORITIES, STATUSES, dueDay, isOwner, taskNumber, taskPeople } from "../lib/taskView";
+import { PageHead } from "./AppLayout";
+
+function errorText(err: unknown, fallback: string): string {
+  return err instanceof Error && err.message ? err.message : fallback;
+}
 
 export function TaskDetailPage() {
-  const { taskId: routeTaskId } = useParams();
-  const isNew = routeTaskId === "new" || !routeTaskId;
+  const { taskId = "" } = useParams();
   const navigate = useNavigate();
-  const { user, loading } = useSession();
-  const userId = user?.$id ?? "";
-
-  const [rowId, setRowId] = useState<string | undefined>(
-    routeTaskId && routeTaskId !== "new" ? routeTaskId : undefined,
-  );
-  const [lists, setLists] = useState<TodoList[]>([]);
-  const [title, setTitle] = useState("");
-  const [notes, setNotes] = useState("");
-  const [status, setStatus] = useState<TaskStatus>("open");
-  const [dueDate, setDueDate] = useState("");
-  const [listId, setListId] = useState("");
-  const [attachmentId, setAttachmentId] = useState("");
+  const { me, tasks, lists, replaceTask, removeTask, openDialog } = useTodo();
+  const cached = tasks.find((t) => t.$id === taskId);
+  const [task, setTask] = useState<Task | undefined>(cached);
+  const [form, setForm] = useState<TaskInput | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (routeTaskId && routeTaskId !== "new") setRowId(routeTaskId);
-  }, [routeTaskId]);
+    if (cached) {
+      setTask(cached);
+      return;
+    }
+    getTask(taskId)
+      .then(setTask)
+      .catch((err) => {
+        clientLog.error("task detail load failed", err, { operation: "getTask", rowId: taskId });
+        setError("Task not found or not shared with you.");
+      });
+  }, [cached, taskId]);
 
   useEffect(() => {
-    if (!userId) return;
-    void listListsForUser(userId).then(setLists);
-  }, [userId]);
+    if (!task) return;
+    setForm({
+      title: task.title,
+      notes: task.notes ?? "",
+      status: task.status,
+      priority: task.priority ?? "mid",
+      dueDate: dueDay(task) ?? "",
+      listId: task.listId ?? "",
+    });
+  }, [task]);
 
-  useEffect(() => {
-    if (isNew || !rowId) return;
-    void (async () => {
-      try {
-        const task = await getTask(rowId);
-        if (task.userId !== userId) {
-          setError("Not found");
-          return;
-        }
-        setRowId(rowDocumentId(task));
-        setTitle(task.title);
-        setNotes(task.notes ?? "");
-        setStatus(task.status ?? "open");
-        setDueDate(task.dueDate ? task.dueDate.slice(0, 10) : "");
-        setListId(task.listId ?? "");
-        setAttachmentId(task.attachmentId ?? "");
-      } catch (err) {
-        clientLog.error("task detail load failed", err, { operation: "getTask", rowId });
-        setError(err instanceof Error ? err.message : "Failed to load task");
-      }
-    })();
-  }, [isNew, rowId, userId]);
+  if (error && !task) {
+    return (
+      <>
+        <PageHead title="Task" />
+        <div className="card card-pad">
+          <div>{error}</div>
+          <Link to="/tasks" className="btn" style={{ alignSelf: "flex-start" }}>
+            Back to tasks
+          </Link>
+        </div>
+      </>
+    );
+  }
+  if (!task || !form) return <PageHead title="Task" />;
 
-  function effectiveTaskId(): string {
-    return routeOrRowId(routeTaskId, rowId);
+  const own = isOwner(task, me.id);
+  const set = (patch: Partial<TaskInput>) => {
+    setForm({ ...form, ...patch });
+    setSaved(false);
+  };
+
+  async function apply(patch: Partial<TaskInput>) {
+    const updated = await updateTask(me.id, taskId, patch);
+    const merged = { ...task!, ...updated };
+    setTask(merged);
+    replaceTask(merged);
   }
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
+    if (!form!.title.trim()) {
+      setError("Give the task a title.");
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
-      const payload = {
-        title: title.trim(),
-        notes,
-        status,
-        dueDate: dueDate ? new Date(dueDate).toISOString() : "",
-        listId,
-        attachmentId,
-      };
-      let task: Task;
-      if (isNew) {
-        task = await createTask(userId, payload);
-      } else {
-        task = await updateTask(userId, effectiveTaskId(), payload);
-      }
-      const savedId = rowDocumentId(task);
-      setRowId(savedId);
-      navigate(`/tasks/${savedId}`, { replace: true });
+      await apply(
+        own
+          ? {
+              ...form!,
+              title: form!.title.trim(),
+              dueDate: form!.dueDate ? new Date(`${form!.dueDate}T00:00:00Z`).toISOString() : "",
+            }
+          : { status: form!.status },
+      );
+      setSaved(true);
     } catch (err) {
-      clientLog.error("task save failed", err, { operation: "saveTask", routeTaskId, rowId });
-      setError(err instanceof Error ? err.message : "Save failed");
+      clientLog.error("task save failed", err, { operation: "saveTask", rowId: taskId });
+      setError(errorText(err, "Save failed"));
     } finally {
       setSaving(false);
     }
@@ -101,127 +107,161 @@ export function TaskDetailPage() {
     event.preventDefault();
     const input = event.currentTarget.elements.namedItem("file") as HTMLInputElement;
     const file = input.files?.[0];
-    if (!file || isNew) return;
+    if (!file) return;
     try {
-      const id = effectiveTaskId();
-      if (attachmentId) await deleteAttachment(attachmentId);
-      const fileId = await uploadAttachment(userId, file);
-      await updateTask(userId, id, { attachmentId: fileId });
-      setAttachmentId(fileId);
+      if (task!.attachmentId) await deleteAttachment(task!.attachmentId);
+      const fileId = await uploadAttachment(me.id, file);
+      await apply({ attachmentId: fileId });
+      input.value = "";
     } catch (err) {
       clientLog.error("attachment upload failed", err, { operation: "uploadAttachment" });
-      setError(err instanceof Error ? err.message : "Upload failed");
+      setError(errorText(err, "Upload failed"));
     }
   }
 
   async function onRemoveAttachment() {
-    if (!attachmentId || isNew) return;
+    if (!task!.attachmentId) return;
     try {
-      await deleteAttachment(attachmentId);
-      await updateTask(userId, effectiveTaskId(), { attachmentId: "" });
-      setAttachmentId("");
+      await deleteAttachment(task!.attachmentId);
+      await apply({ attachmentId: "" });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Remove failed");
+      setError(errorText(err, "Remove failed"));
     }
   }
 
-  if (loading || !user) return null;
+  async function onDelete() {
+    if (!confirm(`Delete "${task!.title}"?`)) return;
+    await removeTask(task!);
+    navigate("/tasks", { replace: true });
+  }
 
   return (
-    <section>
-      <h1 className="page-title ds-h1">{isNew ? "New task" : "Edit task"}</h1>
-      <p className="page-desc">
-        <Link to="/tasks">Back to tasks</Link>
-      </p>
-      <form onSubmit={onSubmit} className="form-stack card" style={{ padding: "var(--space-6)" }}>
-        <div className="input-group">
-          <label className="input-label" htmlFor="task-title">
-            Title
-          </label>
-          <input
-            className="input"
-            id="task-title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-          />
-        </div>
-        <div className="input-group">
-          <label className="input-label" htmlFor="task-notes">
-            Notes
-          </label>
-          <textarea
-            className="input"
-            id="task-notes"
-            rows={4}
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
-        </div>
-        <div className="input-group">
-          <label className="input-label" htmlFor="task-status">
-            Status
-          </label>
-          <select className="input" id="task-status" value={status} onChange={(e) => setStatus(e.target.value as TaskStatus)}>
-            <option value="open">Open</option>
-            <option value="done">Done</option>
-          </select>
-        </div>
-        <div className="input-group">
-          <label className="input-label" htmlFor="task-due">
-            Due date
-          </label>
-          <input
-            className="input"
-            id="task-due"
-            type="date"
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
-          />
-        </div>
-        <div className="input-group">
-          <label className="input-label" htmlFor="task-list">
-            List
-          </label>
-          <select className="input" id="task-list" value={listId} onChange={(e) => setListId(e.target.value)}>
-            <option value="">Inbox</option>
-            {lists.map((l) => (
-              <option key={l.$id} value={l.$id}>
-                {l.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <button type="submit" className="btn btn-primary" disabled={saving}>
-          {saving ? "Saving…" : "Save"}
-        </button>
-      </form>
-
-      {!isNew && (
-        <div className="card form-stack">
-          <h3 className="card-title-text">Attachment</h3>
-          {attachmentId ? (
-            <p className="page-desc">
-              <a href={attachmentDownloadUrl(attachmentId)} target="_blank" rel="noreferrer">
-                Download file
-              </a>
-              <button type="button" className="btn btn-ghost" onClick={() => void onRemoveAttachment()}>
-                Remove
-              </button>
-            </p>
-          ) : (
-            <p className="page-desc">No file attached (pdf, png, jpg, txt up to 5 MB).</p>
-          )}
-          <form onSubmit={onUpload} className="form-stack">
-            <input className="input" name="file" type="file" accept=".pdf,.png,.jpg,.jpeg,.txt" />
-            <button type="submit" className="btn btn-secondary">
-              Upload
+    <>
+      <PageHead title={`#${taskNumber(task)} ${task.title}`} />
+      <div className="detail">
+        <form className="card card-pad" onSubmit={onSubmit}>
+          <div className="field">
+            <label htmlFor="td-title">Title</label>
+            <input id="td-title" className="input" value={form.title} disabled={!own} onChange={(e) => set({ title: e.target.value })} />
+          </div>
+          <div className="field">
+            <label htmlFor="td-notes">Notes</label>
+            <textarea id="td-notes" className="input" rows={5} value={form.notes} disabled={!own} onChange={(e) => set({ notes: e.target.value })} />
+          </div>
+          <div className="grid-2">
+            <div className="field">
+              <label htmlFor="td-status">Status</label>
+              <select id="td-status" className="input" value={form.status} onChange={(e) => set({ status: e.target.value as TaskStatus })}>
+                {STATUSES.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <label htmlFor="td-priority">Priority</label>
+              <select
+                id="td-priority"
+                className="input"
+                value={form.priority}
+                disabled={!own}
+                onChange={(e) => set({ priority: e.target.value as TaskPriority })}
+              >
+                {PRIORITIES.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <label htmlFor="td-list">List</label>
+              <select id="td-list" className="input" value={form.listId} disabled={!own} onChange={(e) => set({ listId: e.target.value })}>
+                <option value="">Inbox</option>
+                {lists.map((l) => (
+                  <option key={l.$id} value={l.$id}>
+                    {l.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <label htmlFor="td-due">Due date</label>
+              <input id="td-due" className="input" type="date" value={form.dueDate} disabled={!own} onChange={(e) => set({ dueDate: e.target.value })} />
+            </div>
+          </div>
+          {error && <div className="error-text">{error}</div>}
+          <div className="dialog-actions">
+            {saved && <span className="muted" style={{ alignSelf: "center" }}>Saved</span>}
+            <Link to="/tasks" className="btn">
+              Back
+            </Link>
+            <button type="submit" className="btn btn-primary" disabled={saving}>
+              {saving ? "Saving…" : "Save"}
             </button>
-          </form>
-        </div>
-      )}
+          </div>
+        </form>
 
-      {error && <p className="mono">{error}</p>}
-    </section>
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <div className="card card-pad">
+            <div className="card-title">People</div>
+            <AvatarStack people={taskPeople(task, me)} />
+            <div className="kv">
+              <span>Owner</span>
+              <span>{own ? "You" : task.ownerName || "Unknown"}</span>
+            </div>
+            <div className="kv">
+              <span>Shared with</span>
+              <span>{task.sharedNames?.length ? task.sharedNames.join(", ") : "Nobody yet"}</span>
+            </div>
+            <div className="kv">
+              <span>Status</span>
+              <span>
+                <StatusBadge status={task.status} />
+              </span>
+            </div>
+            {own && (
+              <div style={{ display: "flex", gap: 8 }}>
+                <button type="button" className="btn btn-sm" onClick={() => openDialog({ kind: "share", taskId: task.$id })}>
+                  <Icon name="share-network" />
+                  Share
+                </button>
+                <button type="button" className="btn btn-sm btn-danger" onClick={() => void onDelete()}>
+                  <Icon name="trash" />
+                  Delete
+                </button>
+              </div>
+            )}
+          </div>
+
+          {own && (
+            <div className="card card-pad">
+              <div className="card-title">Attachment</div>
+              {task.attachmentId ? (
+                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  <a className="btn btn-sm" href={attachmentDownloadUrl(task.attachmentId)} target="_blank" rel="noreferrer">
+                    <Icon name="download-simple" />
+                    Download
+                  </a>
+                  <button type="button" className="btn btn-sm btn-danger" onClick={() => void onRemoveAttachment()}>
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <div className="muted">No file attached (pdf, png, jpg, txt).</div>
+              )}
+              <form onSubmit={onUpload} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <input className="input" name="file" type="file" accept=".pdf,.png,.jpg,.jpeg,.txt" style={{ paddingTop: 6 }} />
+                <button type="submit" className="btn btn-sm" style={{ alignSelf: "flex-start" }}>
+                  <Icon name="upload-simple" />
+                  Upload
+                </button>
+              </form>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
   );
 }

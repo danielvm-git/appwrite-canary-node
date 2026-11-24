@@ -14,9 +14,10 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "preflight": "npm run typecheck && npm run lint && npm test",
     "observability-check": "bash scripts/observability-check.sh",
-    "test:data": "vitest run src/lib/tasks.test.ts src/lib/lists.test.ts src/lib/taskPayload.test.ts src/lib/attachments.test.ts"
+    "test:data": "vitest run src/lib/tasks.test.ts src/lib/lists.test.ts src/lib/taskPayload.test.ts src/lib/attachments.test.ts src/lib/taskView.test.ts src/lib/share.test.ts functions/share-task"
   },
   "dependencies": {
+    "@phosphor-icons/web": "^2.1.2",
     "appwrite": "^21.0.0",
     "express": "^5.1.0",
     "pino": "^9.9.0",

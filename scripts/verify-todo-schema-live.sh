@@ -30,4 +30,29 @@ echo "$idx" | grep -q '"type":"fulltext"' || {
 status="$(echo "$idx" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("status",""))')"
 [[ "$status" == "available" ]] || echo "warn: index status=$status (may still be processing)"
 
+table="$(api "$APPWRITE_ENDPOINT/tablesdb/todo/tables/tasks")"
+python3 - "$table" <<'EOF'
+import json, sys
+cols = {c["key"]: c for c in json.loads(sys.argv[1])["columns"]}
+problems = []
+if set(cols.get("status", {}).get("elements") or []) != {"open", "doing", "review", "done"}:
+    problems.append("status must be open|doing|review|done")
+if set(cols.get("priority", {}).get("elements") or []) != {"high", "mid", "low"}:
+    problems.append("priority must be high|mid|low")
+for key in ("ownerName", "sharedWith", "sharedNames"):
+    if key not in cols:
+        problems.append(f"missing column {key}")
+for key in ("sharedWith", "sharedNames"):
+    if key in cols and not cols[key].get("array"):
+        problems.append(f"{key} must be an array")
+if problems:
+    sys.exit("schema drift: " + "; ".join(problems))
+EOF
+
+fn="$(api "$APPWRITE_ENDPOINT/functions/share-task")"
+echo "$fn" | grep -q '"execute":\["users"\]' || {
+  echo "share-task function missing or not executable by users" >&2
+  exit 1
+}
+
 echo "verify-todo-schema-live: OK"

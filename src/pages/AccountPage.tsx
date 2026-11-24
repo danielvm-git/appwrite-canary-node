@@ -1,11 +1,13 @@
 import { useNavigate } from "react-router-dom";
+import { Avatar, Icon } from "../components/ui";
 import { useSession } from "../hooks/useSession";
+import { useTodo } from "../hooks/useTodo";
+import { PageHead } from "./AppLayout";
 
 export function AccountPage() {
-  const { user, signOut } = useSession();
+  const { signOut } = useSession();
+  const { me } = useTodo();
   const navigate = useNavigate();
-
-  if (!user) return null;
 
   async function onSignOut() {
     await signOut();
@@ -13,26 +15,29 @@ export function AccountPage() {
   }
 
   return (
-    <section>
-      <h1 className="page-title ds-h1">Account</h1>
-      <p className="page-desc">Signed in with Appwrite Auth (email and password).</p>
-      <div className="card form-stack" style={{ padding: "var(--space-6)" }}>
-        <div className="input-group">
-          <span className="input-label">Name</span>
-          <p>{user.name || "—"}</p>
+    <>
+      <PageHead title="Account" />
+      <div className="card card-pad" style={{ maxWidth: 520 }}>
+        <div className="stat-head">
+          <Avatar id={me.id} name={me.name} />
+          <div>
+            <div className="user-name">{me.name}</div>
+            <div className="muted">{me.email}</div>
+          </div>
         </div>
-        <div className="input-group">
-          <span className="input-label">Email</span>
-          <p className="mono">{user.email}</p>
+        <div className="kv">
+          <span>User ID</span>
+          <span className="mono">{me.id}</span>
         </div>
-        <div className="input-group">
-          <span className="input-label">User ID</span>
-          <p className="mono">{user.$id}</p>
+        <div className="kv">
+          <span>Sign-in method</span>
+          <span>Appwrite Auth · email and password</span>
         </div>
-        <button type="button" className="btn btn-primary" onClick={() => void onSignOut()}>
-          Sign out everywhere
+        <button type="button" className="btn btn-danger" style={{ alignSelf: "flex-start" }} onClick={() => void onSignOut()}>
+          <Icon name="sign-out" />
+          Sign out
         </button>
       </div>
-    </section>
+    </>
   );
 }
