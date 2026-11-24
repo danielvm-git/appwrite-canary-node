@@ -143,7 +143,7 @@ function Sidebar({ onNavigate }: { onNavigate: () => void }) {
 }
 
 function Topbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
-  const { me, openDialog } = useTodo();
+  const { openDialog } = useTodo();
   const { q, setQ } = useScope();
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -174,8 +174,8 @@ function Topbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
           <Icon name={theme === "dark" ? "sun" : "moon"} />
         </button>
         <div className="topbar-sep" />
-        <Link to="/account" aria-label="Account">
-          <Avatar id={me.id} name={me.name} />
+        <Link to="/settings" className="icon-btn" title="Settings" aria-label="Settings">
+          <Icon name="gear" />
         </Link>
       </div>
     </header>

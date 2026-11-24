@@ -4,6 +4,7 @@ import { AppLayout } from "./pages/AppLayout";
 import { BoardPage } from "./pages/BoardPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ListsPage } from "./pages/ListsPage";
+import { SettingsPage } from "./pages/SettingsPage";
 import { SignInPage } from "./pages/SignInPage";
 import { TaskDetailPage } from "./pages/TaskDetailPage";
 
@@ -26,7 +27,7 @@ export function App() {
           <Route path="lists" element={<ListsPage />} />
           <Route path="lists/:listId" element={<ListRedirect />} />
           <Route path="account" element={<AccountPage />} />
-          <Route path="settings" element={<Navigate to="/account" replace />} />
+          <Route path="settings" element={<SettingsPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
