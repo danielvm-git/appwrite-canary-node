@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- big-release managed -->
 
+## [1.4.0] - 2026-11-24
+
+### Added
+
+- **feat:** shadcn tasks dashboard board and task sharing ([#18](https://github.com/danielvm-git/appwrite-canary-node/issues/18)) ([8bdad6f](https://github.com/danielvm-git/appwrite-canary-node/commit/8bdad6fb50b1bb4792de405cf66ad87c36b8a0ad))
+
 ## [1.3.4] - 2026-11-24
 
 ### Fixed
